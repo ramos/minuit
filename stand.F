@@ -17,3 +17,10 @@ CC        command "standard" appears.
 CC
       RETURN
       END
+
+      LOGICAL FUNCTION INTRAC()
+      
+      INTRAC = .FALSE.
+      RETURN
+      END FUNCTION INTRAC
+
