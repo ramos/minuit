@@ -34,15 +34,12 @@ C                                        . . save and prepare start vals
       MPAR=NPAR
       NFMXIN = NFCNMX
       DO 125 I= 1, MPAR
-      XT(I) = X(I)
-  125 CONTINUE
+  125 XT(I) = X(I)
       DO 130 J= 1, MPAR*(MPAR+1)/2
-      VTHMAT(J) = VHMAT(J)
-  130 CONTINUE
+  130 VTHMAT(J) = VHMAT(J)
       DO 135 I= 1, MPAR
       GCC(I) = GLOBCC(I)
-         W(I) = WERR(I)
-  135 CONTINUE
+  135 W(I) = WERR(I)
       IT = NIOFEX(ILAX)
       ERP(IT) = 0.
       ERN(IT) = 0.
@@ -96,8 +93,7 @@ C         stop if already at limit with negligible step size
       IF (ABS(DELU)/(ABS(UT)+ABS(U(ILAX))) .LT. EPSMAC)  GO TO 440
       FAC = DELU/W(IT)
          DO 185 I= 1, NPAR
-         X(I) = XT(I) + FAC*XDEV(I)
-  185    CONTINUE
+  185    X(I) = XT(I) + FAC*XDEV(I)
       IF (ISW(5) .GT. 1) WRITE (ISYSWR,801)  ILAX,UT,DELU,U(ILAX)
   801 FORMAT (/' PARAMETER',I4,' SET TO',E11.3,' + ',E10.3,' = ',E12.3)
 C                                        loop to hit AMIN+UP
@@ -148,13 +144,11 @@ C                       normal termination
       ITAUR = 1
       CALL MNFREE(1)
       DO 550 J= 1, MPAR*(MPAR+1)/2
-      VHMAT(J) = VTHMAT(J)
-  550 CONTINUE
+  550 VHMAT(J) = VTHMAT(J)
       DO 595 I= 1, MPAR
       WERR(I) = W(I)
       GLOBCC(I) = GCC(I)
-      X(I) = XT(I)
-  595 CONTINUE
+  595 X(I) = XT(I)
       CALL MNINEX (X)
       EDM = SIGSAV
       AMIN = ABEST

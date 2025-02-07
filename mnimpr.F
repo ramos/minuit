@@ -39,30 +39,25 @@ CC
          DO 2 I= 1, NPAR
          XT(I) = X(I)
          DSAV(I) = WERR(I)
-           DO 1 J = 1, I
+           DO 2 J = 1, I
            NDEX = I*(I-1)/2 + J
            P(I,J) = VHMAT(NDEX)
-           P(J,I) = P(I,J)
-    1      CONTINUE
-    2    CONTINUE
+    2      P(J,I) = P(I,J)
       CALL MNVERT(P,MAXINT,MAXINT,NPAR,IFAIL)
       IF (IFAIL .GE. 1)  GO TO 280
 C               Save inverted matrix in VT
          DO 12 I= 1, NPAR
          NDEX = I*(I-1)/2
-           DO 11 J= 1, I
+           DO 12 J= 1, I
            NDEX = NDEX + 1
-           VTHMAT(NDEX) = P(I,J)
-   11      CONTINUE
-   12    CONTINUE
+   12      VTHMAT(NDEX) = P(I,J)
       LOOP = 0
 C
    20 CONTINUE
          DO 25 I= 1, NPAR
          DIRIN(I) = 2.0*DSAV(I)
          CALL MNRN15(RNUM,ISEED)
-         X(I) = XT(I) + 2.0*DIRIN(I)*(RNUM-0.5)
-   25    CONTINUE
+   25    X(I) = XT(I) + 2.0*DIRIN(I)*(RNUM-0.5)
       LOOP = LOOP + 1
       REG = 2.0
       IF (ISW(5) .GE. 0)   WRITE (ISYSWR, 1040) LOOP
@@ -87,8 +82,7 @@ C                                        . . . . set up  random simplex
             JH = I
          ENDIF
             DO 40 J= 1, NPAR
-            P(J,I) = X(J)
-   40       CONTINUE
+   40       P(J,I) = X(J)
          P(I,NPARP1) = XI
          X(I) = XI
    45    CONTINUE
@@ -107,18 +101,15 @@ C         calculate new point * by reflection
       DO 60 I= 1, NPAR
       PB = 0.
       DO 59 J= 1, NPARP1
-      PB = PB + WG * P(I,J)
-   59 CONTINUE
+   59 PB = PB + WG * P(I,J)
       PBAR(I) = PB - WG * P(I,JH)
-      PSTAR(I)=(1.+ALPHA)*PBAR(I)-ALPHA*P(I,JH)
-   60 CONTINUE
+   60 PSTAR(I)=(1.+ALPHA)*PBAR(I)-ALPHA*P(I,JH)
       CALL MNCALF(FCN,PSTAR,YCALF,FUTIL)
       YSTAR = YCALF
       IF(YSTAR.GE.AMIN) GO TO 70
 C         point * better than jl, calculate new point **
       DO 61 I=1,NPAR
-      PSTST(I)=GAMMA*PSTAR(I)+(1.-GAMMA)*PBAR(I)
-   61 CONTINUE
+   61 PSTST(I)=GAMMA*PSTAR(I)+(1.-GAMMA)*PBAR(I)
       CALL MNCALF(FCN,PSTST,YCALF,FUTIL)
       YSTST = YCALF
    66 IF (YSTST .LT. Y(JL))  GO TO 67
@@ -133,8 +124,7 @@ C         point * is not as good as jl
       IF (JHOLD .NE. JH)  GO TO 50
 C         calculate new point **
    73 DO 74 I=1,NPAR
-      PSTST(I)=BETA*P(I,JH)+(1.-BETA)*PBAR(I)
-   74 CONTINUE
+   74 PSTST(I)=BETA*P(I,JH)+(1.-BETA)*PBAR(I)
       CALL MNCALF(FCN,PSTST,YCALF,FUTIL)
       YSTST = YCALF
       IF(YSTST.GT.Y(JH)) GO TO 30
@@ -183,8 +173,7 @@ C                                        . . . return to previous region
   300 ISW(1) = 1
   325 DO 330 I= 1, NPAR
       DIRIN(I) = 0.01*DSAV(I)
-      X(I) = XT(I)
-  330 CONTINUE
+  330 X(I) = XT(I)
       AMIN = APSI
       EDM = SIGSAV
   350 CALL MNINEX(X)

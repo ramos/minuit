@@ -65,8 +65,7 @@ C               SLAMIN = smallest possible value of ABS(SLAM)
       RATIO = ABS(START(I)/STEP(I))
       IF (SLAMIN .EQ. ZERO)     SLAMIN = RATIO
       IF (RATIO .LT. SLAMIN)  SLAMIN = RATIO
-      X(I) = START(I) + STEP(I)
-   20 CONTINUE
+   20 X(I) = START(I) + STEP(I)
       IF (SLAMIN .EQ. ZERO)  SLAMIN = EPSMAC
       SLAMIN = SLAMIN*EPSMA2
       NPARX = NPAR
@@ -101,8 +100,7 @@ C     IF (DENOM .EQ. ZERO)  DENOM = -0.1*SLOPE
       IF (ABS(SLAM-1.0).LT.TOLER8) SLAM = 1.0+TOLER8
       IF (NXYPT .GE. MAXPT) GO TO 65
       DO 30 I= 1, NPAR
-      X(I) = START(I) + SLAM*STEP(I)
-   30 CONTINUE
+   30 X(I) = START(I) + SLAM*STEP(I)
       CALL MNINEX(X)
       CALL FCN(NPAR,GIN,F2,U,4,FUTIL)
       NFCN = NFCN + 1
@@ -158,8 +156,7 @@ C               come here if step was cut below
 C                take the step
       IF (NXYPT .GE. MAXPT) GO TO 65
       DO 60 I= 1, NPAR
-      X(I) = START(I)+SLAM*STEP(I)
-   60 CONTINUE
+   60 X(I) = START(I)+SLAM*STEP(I)
       CALL MNINEX(X)
       CALL FCN(NPARX,GIN,F3,U,4,FUTIL)
       NFCN = NFCN + 1
@@ -215,8 +212,7 @@ C            stop because within tolerance
       AMIN = FVMIN
       DO 120 I= 1, NPAR
       DIRIN(I) = STEP(I)*XVMIN
-      X(I) = START(I) + DIRIN(I)
-  120 CONTINUE
+  120 X(I) = START(I) + DIRIN(I)
       CALL MNINEX(X)
       IF (XVMIN .LT. 0.)      CALL MNWARN('D','MNLINE',
      +                   ' LINE MINIMUM IN BACKWARDS DIRECTION')

@@ -1,9 +1,8 @@
 
-F90=gcc -O3 -fpic
+F90=ifort
 PATHLIB=/usr/local/lib/
 
 all: lib
-
 
 lib: 
 	$(F90) -c *.F

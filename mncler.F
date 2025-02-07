@@ -25,8 +25,7 @@ CC        Resets the parameter list to UNDEFINED
       U(I) = 0.0
       CPNAM(I) = CUNDEF
       NVARL(I) = -1
-      NIOFEX(I) = 0
-   10 CONTINUE
+   10 NIOFEX(I) = 0
       CALL MNRSET(1)
       CFROM = 'CLEAR   '
       NFCNFR = NFCN

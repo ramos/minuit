@@ -30,11 +30,9 @@ CC
             CALL MNWARN('W',CFROM,'NO ERROR MATRIX.  WILL IMPROVISE.')
             DO 555 I=1,NPAR
               NDEX = I*(I-1)/2
-              DO 553 J=1,I-1
+              DO 554 J=1,I-1
               NDEX = NDEX + 1
-              VHMAT(NDEX) = 0.
-  553         CONTINUE
-  554       CONTINUE
+  554         VHMAT(NDEX) = 0.
             NDEX = NDEX + 1
             IF (G2(I) .LE. ZERO)  THEN
               WINT = WERR(I)

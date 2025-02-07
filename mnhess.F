@@ -67,8 +67,7 @@ C         AIMSAG is the sagitta we are aiming for in second deriv calc.
 C         Zero the second derivative matrix
       NPAR2 = NPAR*(NPAR+1)/2
       DO 10 I= 1,NPAR2
-      VHMAT(I) = 0.
-   10 CONTINUE
+   10 VHMAT(I) = 0.
 C
 C         Loop over variable parameters for second derivatives
       IDRV = 2
@@ -183,8 +182,7 @@ C                  verify matrix positive-definite
       DO 219 J= 1, I
       NDEX = I*(I-1)/2 + J
       P(I,J) = VHMAT(NDEX)
-      P(J,I) = P(I,J)
-  219 CONTINUE
+  219 P(J,I) = P(I,J)
   220 CONTINUE
       CALL MNVERT(P,MAXINT,MAXINT,NPAR,IFAIL)
       IF (IFAIL .GT. 0)  THEN
@@ -200,8 +198,7 @@ C                              off-diagonal elements
           NDEX = NDEX + 1
           ZTEMP = 2.0 * P(I,J)
           EDM = EDM + GRD(I)*ZTEMP*GRD(J)
-          VHMAT(NDEX) = ZTEMP
-  225     CONTINUE
+  225     VHMAT(NDEX) = ZTEMP
 C                              diagonal elements
         NDEX = NDEX + 1
         VHMAT(NDEX) = 2.0 * P(I,I)
@@ -220,12 +217,10 @@ C                              failure to invert 2nd deriv matrix
       NDEX = I*(I-1)/2
       DO 394 J= 1, I-1
       NDEX = NDEX + 1
-      VHMAT(NDEX) = 0.0
-  394 CONTINUE
+  394 VHMAT(NDEX) = 0.0
       NDEX = NDEX +1
       G2I = G2(I)
       IF (G2I .LE. ZERO)  G2I = 1.0
-      VHMAT(NDEX) = 2.0/G2I
-  395 CONTINUE
+  395 VHMAT(NDEX) = 2.0/G2I
   900 RETURN
       END

@@ -19,13 +19,11 @@ CC
 #include "minuit/d506cm.inc"
       DIMENSION PNEW(*), Y(*)
       DO 10 I=1,NPAR
-      P(I,JH) = PNEW(I)
-   10 CONTINUE
+   10 P(I,JH) = PNEW(I)
       Y(JH)=YNEW
       IF(YNEW .LT. AMIN) THEN
         DO 15 I=1,NPAR
-        X(I) = PNEW(I)
-   15   CONTINUE
+   15   X(I) = PNEW(I)
         CALL MNINEX(X)
         AMIN = YNEW
         CSTATU = 'PROGRESS  '

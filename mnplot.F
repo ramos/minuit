@@ -87,8 +87,7 @@ C         find scale constants
 C         convert points to grid positions
       DO 300 I= 1, NXYPT
       XPT(I) = AX*XPT(I) + BX
-      YPT(I) = ANY-AY*YPT(I) - BY
-  300 CONTINUE
+  300 YPT(I) = ANY-AY*YPT(I) - BY
       NXBEST = AX*XBEST + BX
       NYBEST = ANY  - AY*YBEST - BY
 C         print the points
@@ -99,15 +98,13 @@ C         print the points
       OVERPR=.FALSE.
       DO 400 I= 1, NY
       DO 310 IBK= 1, NX
-      CLINE (IBK:IBK) = CBLANK
-  310 CONTINUE
+  310 CLINE (IBK:IBK) = CBLANK
       CLINE(1:1) = CDOT
       CLINE(NX:NX) = CDOT
       CLINE(NXBEST:NXBEST) = CDOT
       IF (I.NE.1 .AND. I.NE.NYBEST .AND. I.NE.NY)  GO TO 320
       DO 315 J= 1, NX
-      CLINE(J:J) = CDOT
-  315 CONTINUE
+  315 CLINE(J:J) = CDOT
   320 CONTINUE
       YPRT = YMAX - FLOAT(I-1)*BWIDY
       IF (ISP1 .GT. NXYPT)  GO TO 350
@@ -145,8 +142,7 @@ C         print labels on x-axis every ten columns
       WRITE (NUNIT, '(18X,A)')       CLINE(:NX)
 C
       DO 430 IBK= 1, 12
-      XVALUS(IBK) = XMIN + FLOAT(IBK-1)*10.*BWIDX
-  430 CONTINUE
+  430 XVALUS(IBK) = XMIN + FLOAT(IBK-1)*10.*BWIDX
       ITEN = (NX+9) / 10
       WRITE (NUNIT,'(12X,12G10.4)')  (XVALUS(IBK), IBK=1,ITEN)
       CHMESS = ' '

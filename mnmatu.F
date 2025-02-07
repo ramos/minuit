@@ -53,8 +53,7 @@ C     NCOEF is number of coeff. that fit on one line, not to exceed 20
            N = MIN(I,J)
            NDEX = M*(M-1)/2 + N
            NDJ = J*(J+1)/2
-           VLINE(J) = VHMAT(NDEX)/SQRT(ABS(VHMAT(NDI)*VHMAT(NDJ)))
-  170      CONTINUE
+  170      VLINE(J) = VHMAT(NDEX)/SQRT(ABS(VHMAT(NDI)*VHMAT(NDJ)))
          NPARM = MIN(NPAR,NCOEF)
          WRITE (ISYSWR,171)   IX, GLOBCC(I), (VLINE(IT),IT=1,NPARM)
   171    FORMAT (6X,I3,2X,F7.5,1X,20F6.3)

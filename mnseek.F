@@ -56,16 +56,14 @@ C              parameter with limits
          IF (ABS(DIRIN(IPAR)).GT.TWOPI)  DIRIN(IPAR)=TWOPI
          ENDIF
       XMID(IPAR) = X(IPAR)
-      XBEST(IPAR) = X(IPAR)
-   10 CONTINUE
+   10 XBEST(IPAR) = X(IPAR)
 C                              search loop
       DO 500 ISTEP= 1, MXSTEP
       IF (IFAIL .GE. MXFAIL)  GO TO 600
         DO 100 IPAR= 1, NPAR
         CALL MNRN15(RNUM1,ISEED)
         CALL MNRN15(RNUM2,ISEED)
-        X(IPAR) = XMID(IPAR) + 0.5*(RNUM1+RNUM2-1.)*DIRIN(IPAR)
-  100   CONTINUE
+  100   X(IPAR) = XMID(IPAR) + 0.5*(RNUM1+RNUM2-1.)*DIRIN(IPAR)
       CALL MNINEX(X)
       CALL FCN(NPARX,GIN,FTRY,U,4,FUTIL)
       NFCN = NFCN + 1
@@ -74,8 +72,7 @@ C                              search loop
             CSTATU = 'IMPROVEMNT'
             AMIN = FTRY
             DO 200 IB= 1, NPAR
-            XBEST(IB) = X(IB)
-  200       CONTINUE
+  200       XBEST(IB) = X(IB)
             IFAIL = 0
             IF (ISW(5) .GE. 2) CALL MNPRIN(2,AMIN)
             ENDIF
@@ -99,8 +96,7 @@ C                               end search loop
       IF (ISW(5) .GT. 1) WRITE (ISYSWR,601) IFAIL
   601 FORMAT(' MNSEEK:',I5,' SUCCESSIVE UNSUCCESSFUL TRIALS.')
       DO 700 IB= 1, NPAR
-      X(IB) = XBEST(IB)
-  700 CONTINUE
+  700 X(IB) = XBEST(IB)
       CALL MNINEX(X)
       IF (ISW(5) .GE. 1)  CALL MNPRIN(2,AMIN)
       IF (ISW(5) .EQ. 0)  CALL MNPRIN(0,AMIN)
