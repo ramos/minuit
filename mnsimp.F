@@ -101,13 +101,15 @@ C         local minimum found in ith direction
       IF (AMING .LT. ABSMIN)  ABSMIN = AMING
       X(I) = BESTX
       DO 9 K= 1, NPAR
-    9 P(K,I) = X(K)
+      P(K,I) = X(K)
+    9 CONTINUE
    10 CONTINUE
       JH = NPARP1
       AMIN=Y(JL)
       CALL MNRAZZ(YNPP1,PBAR,Y,JH,JL)
       DO 20 I= 1, NPAR
-   20 X(I) = P(I,JL)
+      X(I) = P(I,JL)
+   20 CONTINUE
       CALL MNINEX(X)
       IF (ISW(5) .GE. 1)  CALL MNPRIN(5,AMIN)
       EDM = BIGEDM
@@ -122,9 +124,11 @@ C         calculate new point * by reflection
       DO 60 I= 1, NPAR
       PB = 0.
       DO 59 J= 1, NPARP1
-   59 PB = PB + WG * P(I,J)
+      PB = PB + WG * P(I,J)
+   59 CONTINUE
       PBAR(I) = PB - WG * P(I,JH)
-   60 PSTAR(I)=(1.+ALPHA)*PBAR(I)-ALPHA*P(I,JH)
+      PSTAR(I)=(1.+ALPHA)*PBAR(I)-ALPHA*P(I,JH)
+   60 CONTINUE
       CALL MNINEX(PSTAR)
       CALL FCN(NPARX,GIN,YSTAR,U,4,FUTIL)
       NFCN=NFCN+1
@@ -132,7 +136,8 @@ C         calculate new point * by reflection
 C         point * better than jl, calculate new point **
       CSTATU = 'PROGRESS  '
       DO 61 I=1,NPAR
-   61 PSTST(I)=GAMMA*PSTAR(I)+(1.-GAMMA)*PBAR(I)
+      PSTST(I)=GAMMA*PSTAR(I)+(1.-GAMMA)*PBAR(I)
+   61 CONTINUE
       CALL MNINEX(PSTST)
       CALL FCN(NPARX,GIN,YSTST,U,4,FUTIL)
       NFCN=NFCN+1
@@ -143,7 +148,8 @@ C         try a parabola through ph, pstar, pstst.  min = prho
       IF (RHO .LT. RHOMIN)  GO TO 66
       IF (RHO .GT. RHOMAX)  RHO = RHOMAX
       DO 64 I= 1, NPAR
-   64 PRHO(I) = RHO*PBAR(I) + (1.0-RHO)*P(I,JH)
+      PRHO(I) = RHO*PBAR(I) + (1.0-RHO)*P(I,JH)
+   64 CONTINUE
       CALL MNINEX(PRHO)
       CALL FCN(NPARX,GIN,YRHO, U,4,FUTIL)
       NFCN = NFCN + 1
@@ -169,7 +175,8 @@ C         point * is not as good as jl
       IF (JHOLD .NE. JH)  GO TO 50
 C         calculate new point **
    73 DO 74 I=1,NPAR
-   74 PSTST(I)=BETA*P(I,JH)+(1.-BETA)*PBAR(I)
+      PSTST(I)=BETA*P(I,JH)+(1.-BETA)*PBAR(I)
+   74 CONTINUE
       CALL MNINEX (PSTST)
       CALL FCN(NPARX,GIN,YSTST,U,4,FUTIL)
       NFCN=NFCN+1
@@ -192,8 +199,10 @@ C                                        . . . . . .  end main loop
    80 DO 82 I=1,NPAR
       PB = 0.
       DO 81 J=1,NPARP1
-   81 PB = PB + WG * P(I,J)
-   82 PBAR(I) = PB - WG * P(I,JH)
+      PB = PB + WG * P(I,J)
+   81 CONTINUE
+      PBAR(I) = PB - WG * P(I,JH)
+   82 CONTINUE
       CALL MNINEX(PBAR)
       CALL FCN(NPARX,GIN,YPBAR,U,4,FUTIL)
       NFCN=NFCN+1

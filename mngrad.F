@@ -31,13 +31,15 @@ C
       IF (WORD7(1) .GT. ZERO)  GO TO 2000
 C                  get user-calculated first derivatives from FCN
       DO 30 I= 1, NU
-   30 GIN(I) = UNDEFI
+      GIN(I) = UNDEFI
+   30 CONTINUE
       CALL MNINEX(X)
       CALL FCN(NPARX,GIN,FZERO,U,2,FUTIL)
       NFCN = NFCN + 1
       CALL MNDERI(FCN,FUTIL)
       DO 40 I= 1, NPAR
-   40 GF(I) = GRD(I)
+      GF(I) = GRD(I)
+   40 CONTINUE
 C                    get MINUIT-calculated first derivatives
       ISW(3) = 0
       ISTSAV = ISTRAT

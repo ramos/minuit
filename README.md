@@ -6,3 +6,5 @@ statements \
 The minuit.patch elimininates the compilation warnings and sets minuit to give the smae results \
 as the last compiled version available for debian ...20061220+dfsg3-4.4
 
+prompt> patch -p1 < minuit.patch && make
+

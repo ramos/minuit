@@ -420,7 +420,8 @@ C                                      . . . . . . . . . . jump
       DO 2620 I= 1, NPAR
         CALL MNRN15(RNO,IZERO)
         RNO = 2.0*RNO - 1.0
- 2620   X(I) = X(I) + RNO*STEP*WERR(I)
+        X(I) = X(I) + RNO*STEP*WERR(I)
+ 2620   CONTINUE
       CALL MNINEX(X)
       CALL MNAMIN(FCN,FUTIL)
       CALL MNRSET(0)
