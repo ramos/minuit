@@ -1,11 +1,12 @@
 diff -x .git -ruN minuit-orig/Makefile minuit/Makefile
 --- minuit-orig/Makefile	2025-02-04 18:35:50.012474171 +0000
-+++ minuit/Makefile	2025-02-06 20:18:10.635803967 +0000
++++ minuit/Makefile	2025-02-08 17:49:42.573424405 +0000
 @@ -1,9 +1,10 @@
  
 -F90=ifort
+-PATHLIB=/usr/local/lib/
 +F90=gcc -O3 -fpic
- PATHLIB=/usr/local/lib/
++PATHLIB=../OneFit-Engine/lib
  
  all: lib
  
@@ -13,6 +14,12 @@ diff -x .git -ruN minuit-orig/Makefile minuit/Makefile
  lib: 
  	$(F90) -c *.F
  	ar rcs libminuit.a *.o
+@@ -13,5 +14,4 @@
+ 
+ clean: 
+ 	rm *.o 
+-	rm *.mod
+ 	rm *.a
 diff -x .git -ruN minuit-orig/minuit/d506cm.inc minuit/minuit/d506cm.inc
 --- minuit-orig/minuit/d506cm.inc	2025-02-04 18:35:50.016473884 +0000
 +++ minuit/minuit/d506cm.inc	2025-02-06 19:57:18.326467597 +0000
