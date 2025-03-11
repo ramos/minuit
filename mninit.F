@@ -83,7 +83,8 @@ C                      =-1 for originally interactive temporarily batch
 #endif
 C        DEBUG options set to default values
       DO 10 IDB= 0, MAXDBG
-   10 IDBG(IDB) = 0
+      IDBG(IDB) = 0
+   10 CONTINUE
       LREPOR = .FALSE.
       LWARN  = .TRUE.
       LIMSET = .FALSE.

@@ -1,8 +1,9 @@
 
-F90=ifort
-PATHLIB=/usr/local/lib/
+F90=gcc -O3 -fpic
+PATHLIB=../OneFit-Engine/lib
 
 all: lib
+
 
 lib: 
 	$(F90) -c *.F
@@ -13,5 +14,4 @@ install: all
 
 clean: 
 	rm *.o 
-	rm *.mod
 	rm *.a

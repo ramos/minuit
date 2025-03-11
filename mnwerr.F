@@ -39,10 +39,12 @@ C                          global correlation coefficients
          DO 130 I= 1, NPAR
             GLOBCC(I) = 0.
             K1 = I*(I-1)/2
-            DO 130 J= 1, I
+            DO 129 J= 1, I
                K = K1 + J
                P(I,J) = VHMAT(K)
-  130          P(J,I) = P(I,J)
+               P(J,I) = P(I,J)
+  129       CONTINUE
+  130    CONTINUE
          CALL MNVERT(P,MAXINT,MAXINT,NPAR,IERR)
          IF (IERR .EQ. 0)   THEN
             DO 150 IIN= 1, NPAR

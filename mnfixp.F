@@ -68,7 +68,8 @@ C                    remove one row and one column from variance matrix
       M = MAX(I,IINT)
       N = MIN(I,IINT)
       NDEX = M*(M-1)/2 + N
-  260 YY(I)=VHMAT(NDEX)
+      YY(I)=VHMAT(NDEX)
+  260 CONTINUE
       YYOVER = 1.0/YY(IINT)
       KNEW = 0
       KOLD = 0
