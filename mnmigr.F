@@ -104,7 +104,8 @@ C                           make diagonal error matrix
          NDEX = I*(I-1)/2
            DO 7 J=1,I-1
            NDEX = NDEX + 1
-    7      VHMAT(NDEX) = 0.
+           VHMAT(NDEX) = 0.
+    7      CONTINUE
          NDEX = NDEX + 1
          IF (G2(I) .LE. ZERO)  G2(I) = 1.
          VHMAT(NDEX) = 2./G2(I)
@@ -128,9 +129,11 @@ C                                        . . . get EDM and set up loop
          NDEX = I*(I-1)/2
            DO 17 J= 1, I-1
            NDEX = NDEX + 1
-   17      EDM = EDM + GS(I)*VHMAT(NDEX)*GS(J)
+           EDM = EDM + GS(I)*VHMAT(NDEX)*GS(J)
+   17      CONTINUE
          NDEX = NDEX + 1
-   18    EDM = EDM + 0.5 * GS(I)**2 *VHMAT(NDEX)
+         EDM = EDM + 0.5 * GS(I)**2 *VHMAT(NDEX)
+   18    CONTINUE
       EDM = EDM * 0.5 * (1.0+3.0*DCOVAR)
         IF (EDM .LT. ZERO)  THEN
         CALL MNWARN('W','MIGRAD','STARTING MATRIX NOT POS-DEFINITE.')
@@ -156,9 +159,11 @@ C                                        . . . . .  start main loop
            M = MAX(I,J)
            N = MIN(I,J)
            NDEX = M*(M-1)/2 + N
-   25      RI = RI + VHMAT(NDEX) *GS(J)
+           RI = RI + VHMAT(NDEX) *GS(J)
+   25      CONTINUE
          STEP(I) = -0.5*RI
-   30    GDEL = GDEL + STEP(I)*GS(I)
+         GDEL = GDEL + STEP(I)*GS(I)
+   30    CONTINUE
       IF (GSSQ .EQ. ZERO)  THEN
           CALL MNWARN('D','MIGRAD',
      +             ' FIRST DERIVATIVES OF FCN ARE ALL ZERO')
@@ -199,13 +204,15 @@ C                                         . calculate new EDM
            N = MIN(I,J)
            NDEX = M*(M-1)/2 + N
            VGI = VGI + VHMAT(NDEX)*(GRD(J)-GS(J))
-   90      RI  =  RI + VHMAT(NDEX)* GRD(J)
+           RI  =  RI + VHMAT(NDEX)* GRD(J)
+   90      CONTINUE
       VG(I) = VGI*0.5
       GAMI = GRD(I) - GS(I)
       GDGSSQ = GDGSSQ + GAMI**2
       GVG = GVG + GAMI*VG(I)
       DELGAM = DELGAM + DIRIN(I)*GAMI
-  100 EDM = EDM + GRD(I)*RI*0.5
+      EDM = EDM + GRD(I)*RI*0.5
+  100 CONTINUE
       EDM = EDM * 0.5 * (1.0 + 3.0*DCOVAR)
 C                          . if EDM negative,  not positive-definite
       IF (EDM .LT. ZERO .OR. GVG .LE. ZERO)  THEN
@@ -233,13 +240,14 @@ C                                        .  update covariance matrix
       DSUM = 0.
       VSUM = 0.
          DO  120  I=1, NPAR
-           DO  120  J=1, I
+           DO 119  J=1, I
            D = DIRIN(I)*DIRIN(J)/DELGAM - VG(I)*VG(J)/GVG
            DSUM = DSUM + ABS(D)
            NDEX = I*(I-1)/2 + J
            VHMAT(NDEX) = VHMAT(NDEX) + 2.0*D
            VSUM = VSUM + ABS(VHMAT(NDEX))
-  120      CONTINUE
+  119 CONTINUE
+  120 CONTINUE
 C                smooth local fluctuations by averaging DCOVAR
       DCOVAR = 0.5*(DCOVAR + DSUM/VSUM)
       IF (ISWTR.GE.3 .OR. LDEBUG) WRITE (ISYSWR,'(A,F5.1,A)')
@@ -248,11 +256,14 @@ C                smooth local fluctuations by averaging DCOVAR
      +             (VHMAT(KK),KK=1,10)
       IF (DELGAM .LE. GVG)  GO TO 135
       DO 125 I= 1, NPAR
-  125 FLNU(I) = DIRIN(I)/DELGAM - VG(I)/GVG
+      FLNU(I) = DIRIN(I)/DELGAM - VG(I)/GVG
+  125 CONTINUE
       DO 130 I= 1, NPAR
-      DO 130 J= 1, I
+      DO 129 J= 1, I
       NDEX = I*(I-1)/2 + J
-  130 VHMAT(NDEX) = VHMAT(NDEX) + 2.0*GVG*FLNU(I)*FLNU(J)
+      VHMAT(NDEX) = VHMAT(NDEX) + 2.0*GVG*FLNU(I)*FLNU(J)
+  129 CONTINUE
+  130 CONTINUE
   135 CONTINUE
 C                                              and see if converged
       IF (EDM .LT. 0.1*RHOTOL)  GO TO 300
@@ -277,7 +288,8 @@ C                                         . . fails to improve . .
   200 IF (ISWTR .GE. 1)  WRITE (ISYSWR,'(A)')
      +           ' MIGRAD FAILS TO FIND IMPROVEMENT'
       DO 210 I= 1, NPAR
-  210 X(I) = XXS(I)
+      X(I) = XXS(I)
+  210 CONTINUE
       IF (EDM .LT. RHOTOL)  GO TO 300
       IF (EDM .LT. ABS(EPSMA2*AMIN))  THEN
          IF (ISWTR .GE. 0)  WRITE (ISYSWR, '(A)')

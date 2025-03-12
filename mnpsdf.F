@@ -60,9 +60,11 @@ C                    Store VHMAT in P, make sure diagonal pos.
       VHMAT(NDEXD) = VHMAT(NDEXD) + DG
       IF (VHMAT(NDEXD) .LE. ZERO)   VHMAT(NDEXD) = 1.0
       S(I) = 1.0/SQRT(VHMAT(NDEXD))
-      DO 213 J= 1, I
+      DO 212 J= 1, I
       NDEX =  NDEX + 1
-  213 P(I,J) = VHMAT(NDEX) * S(I)*S(J)
+      P(I,J) = VHMAT(NDEX) * S(I)*S(J)
+  212 CONTINUE
+  213 CONTINUE
 C      call eigen (p,p,maxint,npar,pstar,-npar)
       CALL MNEIG(P,MAXINT,NPAR,MAXINT,PSTAR,EPSPDF,IFAULT)
       PMIN = PSTAR(1)
@@ -81,7 +83,8 @@ C      call eigen (p,p,maxint,npar,pstar,-npar)
       PADD = 1.0E-3*PMAX - PMIN
       DO 216 IP= 1, NPAR
       NDEX = IP*(IP+1)/2
-  216 VHMAT(NDEX) = VHMAT(NDEX) *(1.0 + PADD)
+      VHMAT(NDEX) = VHMAT(NDEX) *(1.0 + PADD)
+  216 CONTINUE
       CSTATU= 'NOT POSDEF'
       WRITE (CHBUFF,'(G12.5)') PADD
       CALL MNWARN('W',CFROM,

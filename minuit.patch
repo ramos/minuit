@@ -1,0 +1,996 @@
+diff -x .git -ruN minuit-orig/Makefile minuit/Makefile
+--- minuit-orig/Makefile	2025-02-04 18:35:50.012474171 +0000
++++ minuit/Makefile	2025-02-08 17:49:42.573424405 +0000
+@@ -1,9 +1,10 @@
+ 
+-F90=ifort
+-PATHLIB=/usr/local/lib/
++F90=gcc -O3 -fpic
++PATHLIB=../OneFit-Engine/lib
+ 
+ all: lib
+ 
++
+ lib: 
+ 	$(F90) -c *.F
+ 	ar rcs libminuit.a *.o
+@@ -13,5 +14,4 @@
+ 
+ clean: 
+ 	rm *.o 
+-	rm *.mod
+ 	rm *.a
+diff -x .git -ruN minuit-orig/minuit/d506cm.inc minuit/minuit/d506cm.inc
+--- minuit-orig/minuit/d506cm.inc	2025-02-04 18:35:50.016473884 +0000
++++ minuit/minuit/d506cm.inc	2025-02-06 19:57:18.326467597 +0000
+@@ -18,7 +18,7 @@
+ *
+ * d506cm.inc
+ *
+-      PARAMETER (MNE=100 , MNI=100)
++      PARAMETER (MNE=100 , MNI=50)
+       PARAMETER (MNIHL=MNI*(MNI+1)/2)
+       CHARACTER*10 CPNAM
+       COMMON
+diff -x .git -ruN minuit-orig/mncalf.F minuit/mncalf.F
+--- minuit-orig/mncalf.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mncalf.F	2025-02-06 20:31:04.547296188 +0000
+@@ -25,14 +25,17 @@
+       NFCN = NFCN + 1
+       DO 200 I= 1, NPAR
+       GRD(I) = 0.
+-         DO 200 J= 1, NPAR
++         DO 199 J= 1, NPAR
+          M = MAX(I,J)
+          N = MIN(I,J)
+          NDEX = M*(M-1)/2 + N
+-  200    GRD(I) = GRD(I) + VTHMAT(NDEX) * (XT(J)-PVEC(J))
++         GRD(I) = GRD(I) + VTHMAT(NDEX) * (XT(J)-PVEC(J))
++  199 CONTINUE
++  200 CONTINUE
+       DENOM = 0.
+       DO 210 I= 1, NPAR
+-  210 DENOM = DENOM + GRD(I) * (XT(I)-PVEC(I))
++      DENOM = DENOM + GRD(I) * (XT(I)-PVEC(I))
++  210 CONTINUE
+       IF (DENOM .LE. ZERO)  THEN
+          DCOVAR = 1.
+          ISW(2) = 0
+diff -x .git -ruN minuit-orig/mncler.F minuit/mncler.F
+--- minuit-orig/mncler.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mncler.F	2025-02-06 20:31:34.119750638 +0000
+@@ -25,7 +25,8 @@
+       U(I) = 0.0
+       CPNAM(I) = CUNDEF
+       NVARL(I) = -1
+-   10 NIOFEX(I) = 0
++      NIOFEX(I) = 0
++   10 CONTINUE
+       CALL MNRSET(1)
+       CFROM = 'CLEAR   '
+       NFCNFR = NFCN
+diff -x .git -ruN minuit-orig/mncont.F minuit/mncont.F
+--- minuit-orig/mncont.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mncont.F	2025-02-06 20:33:28.513674894 +0000
+@@ -135,12 +135,15 @@
+       MPAR=NPAR
+       NFMXIN = NFCNMX
+       DO 125 I= 1, MPAR
+-  125 XT(I) = X(I)
++      XT(I) = X(I)
++  125 CONTINUE
+       DO 130 J= 1, MPAR*(MPAR+1)/2
+-  130 VTHMAT(J) = VHMAT(J)
++      VTHMAT(J) = VHMAT(J)
++  130 CONTINUE
+       DO 135 I= 1, MPAR
+       GCC(I) = GLOBCC(I)
+-  135 W(I) = WERR(I)
++      W(I) = WERR(I)
++  135 CONTINUE
+ C                           fix the two parameters in question
+       KINTS = NIOFEX(KE1)
+       CALL MNFIXP (KINTS,IERR)
+@@ -243,11 +246,13 @@
+       CALL MNFREE(1)
+       CALL MNFREE(1)
+       DO 1100 J= 1, MPAR*(MPAR+1)/2
+- 1100 VHMAT(J) = VTHMAT(J)
++      VHMAT(J) = VTHMAT(J)
++ 1100 CONTINUE
+       DO 1120 I= 1, MPAR
+       GLOBCC(I) = GCC(I)
+       WERR(I) = W(I)
+- 1120 X(I) = XT(I)
++      X(I) = XT(I)
++ 1120 CONTINUE
+       CALL MNINEX (X)
+       EDM = SIGSAV
+       AMIN = ABEST
+diff -x .git -ruN minuit-orig/mncuve.F minuit/mncuve.F
+--- minuit-orig/mncuve.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mncuve.F	2025-02-07 13:00:01.908502416 +0000
+@@ -30,9 +30,11 @@
+             CALL MNWARN('W',CFROM,'NO ERROR MATRIX.  WILL IMPROVISE.')
+             DO 555 I=1,NPAR
+               NDEX = I*(I-1)/2
+-              DO 554 J=1,I-1
++              DO 553 J=1,I-1
+               NDEX = NDEX + 1
+-  554         VHMAT(NDEX) = 0.
++              VHMAT(NDEX) = 0.
++  553         CONTINUE
++  554       CONTINUE
+             NDEX = NDEX + 1
+             IF (G2(I) .LE. ZERO)  THEN
+               WINT = WERR(I)
+diff -x .git -ruN minuit-orig/mneig.F minuit/mneig.F
+--- minuit-orig/mneig.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mneig.F	2025-02-07 13:55:28.453026357 +0000
+@@ -28,7 +28,8 @@
+       IF(L .LT. 1) GO TO 25
+ C
+       DO 20 K = 1,L
+-   20 GL = GL+A(I,K)**2
++      GL = GL+A(I,K)**2
++   20 CONTINUE
+    25 H = GL + F**2
+ C
+       IF(GL .GT. TOL) GO TO 30
+@@ -50,13 +51,15 @@
+       A(J,I) = A(I,J)/H
+       GL = ZERO
+       DO 40 K = 1,J
+-   40 GL = GL+A(J,K)*A(I,K)
++      GL = GL+A(J,K)*A(I,K)
++   40 CONTINUE
+ C
+       IF(J .GE. L) GO TO 47
+ C
+       J1 = J+1
+       DO 45 K = J1,L
+-   45 GL = GL+A(K,J)*A(I,K)
++      GL = GL+A(K,J)*A(I,K)
++   45 CONTINUE
+    47 WORK(N+J) = GL/H
+       F = F+GL*A(J,I)
+    50 CONTINUE
+@@ -65,8 +68,9 @@
+       F = A(I,J)
+       GL = WORK(N+J)-HH*F
+       WORK(N+J) = GL
+-      DO 60 K = 1,J
++      DO 59 K = 1,J
+       A(J,K) = A(J,K)-F*WORK(N+K)-GL*A(I,K)
++   59 CONTINUE
+    60 CONTINUE
+       WORK(I) = H
+    65 I = I-1
+@@ -81,9 +85,11 @@
+       DO 90 J = 1,L
+       GL = ZERO
+       DO 80 K = 1,L
+-   80 GL = GL+A(I,K)*A(K,J)
+-      DO 90 K = 1,L
++      GL = GL+A(I,K)*A(K,J)
++   80 CONTINUE
++      DO 89 K = 1,L
+       A(K,J) = A(K,J)-GL*A(K,I)
++   89 CONTINUE
+    90 CONTINUE
+   100 WORK(I) = A(I,I)
+       A(I,I) = ONE
+@@ -100,7 +106,8 @@
+       N1 = N-1
+       DO 130 I = 2,N
+       I0 = N+I-1
+-  130 WORK(I0) = WORK(I0+1)
++      WORK(I0) = WORK(I0+1)
++  130 CONTINUE
+       WORK(N+N) = ZERO
+       B = ZERO
+       F = ZERO
+@@ -130,7 +137,8 @@
+ C
+       H = WORK(L)-WORK(N+L)/PR
+       DO 170 I=L,N
+-  170 WORK(I) = WORK(I)-H
++      WORK(I) = WORK(I)-H
++  170 CONTINUE
+       F = F+H
+       PT = WORK(M)
+       C = ONE
+@@ -158,10 +166,11 @@
+       C = ONE/R
+   190 PT = C*WORK(I)-S*GL
+       WORK(J) = H+S*(C*GL+S*WORK(I))
+-      DO 200 K = 1,N
++      DO 199 K = 1,N
+       H = A(K,J)
+       A(K,J) = S*A(K,I)+C*H
+       A(K,I) = C*A(K,I)-S*H
++  199 CONTINUE
+   200 CONTINUE
+       WORK(N+L) = S*PT
+       WORK(L) = C*PT
+diff -x .git -ruN minuit-orig/mnexcm.F minuit/mnexcm.F
+--- minuit-orig/mnexcm.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mnexcm.F	2025-02-07 13:57:04.155323988 +0000
+@@ -420,7 +420,8 @@
+       DO 2620 I= 1, NPAR
+         CALL MNRN15(RNO,IZERO)
+         RNO = 2.0*RNO - 1.0
+- 2620   X(I) = X(I) + RNO*STEP*WERR(I)
++        X(I) = X(I) + RNO*STEP*WERR(I)
++ 2620   CONTINUE
+       CALL MNINEX(X)
+       CALL MNAMIN(FCN,FUTIL)
+       CALL MNRSET(0)
+diff -x .git -ruN minuit-orig/mnfixp.F minuit/mnfixp.F
+--- minuit-orig/mnfixp.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mnfixp.F	2025-02-07 13:58:23.043243472 +0000
+@@ -68,7 +68,8 @@
+       M = MAX(I,IINT)
+       N = MIN(I,IINT)
+       NDEX = M*(M-1)/2 + N
+-  260 YY(I)=VHMAT(NDEX)
++      YY(I)=VHMAT(NDEX)
++  260 CONTINUE
+       YYOVER = 1.0/YY(IINT)
+       KNEW = 0
+       KOLD = 0
+diff -x .git -ruN minuit-orig/mngrad.F minuit/mngrad.F
+--- minuit-orig/mngrad.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mngrad.F	2025-02-07 13:59:24.400147004 +0000
+@@ -31,13 +31,15 @@
+       IF (WORD7(1) .GT. ZERO)  GO TO 2000
+ C                  get user-calculated first derivatives from FCN
+       DO 30 I= 1, NU
+-   30 GIN(I) = UNDEFI
++      GIN(I) = UNDEFI
++   30 CONTINUE
+       CALL MNINEX(X)
+       CALL FCN(NPARX,GIN,FZERO,U,2,FUTIL)
+       NFCN = NFCN + 1
+       CALL MNDERI(FCN,FUTIL)
+       DO 40 I= 1, NPAR
+-   40 GF(I) = GRD(I)
++      GF(I) = GRD(I)
++   40 CONTINUE
+ C                    get MINUIT-calculated first derivatives
+       ISW(3) = 0
+       ISTSAV = ISTRAT
+diff -x .git -ruN minuit-orig/mnhess.F minuit/mnhess.F
+--- minuit-orig/mnhess.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mnhess.F	2025-02-07 14:02:34.698984485 +0000
+@@ -67,7 +67,8 @@
+ C         Zero the second derivative matrix
+       NPAR2 = NPAR*(NPAR+1)/2
+       DO 10 I= 1,NPAR2
+-   10 VHMAT(I) = 0.
++      VHMAT(I) = 0.
++   10 CONTINUE
+ C
+ C         Loop over variable parameters for second derivatives
+       IDRV = 2
+@@ -182,7 +183,8 @@
+       DO 219 J= 1, I
+       NDEX = I*(I-1)/2 + J
+       P(I,J) = VHMAT(NDEX)
+-  219 P(J,I) = P(I,J)
++      P(J,I) = P(I,J)
++  219 CONTINUE
+   220 CONTINUE
+       CALL MNVERT(P,MAXINT,MAXINT,NPAR,IFAIL)
+       IF (IFAIL .GT. 0)  THEN
+@@ -198,7 +200,8 @@
+           NDEX = NDEX + 1
+           ZTEMP = 2.0 * P(I,J)
+           EDM = EDM + GRD(I)*ZTEMP*GRD(J)
+-  225     VHMAT(NDEX) = ZTEMP
++          VHMAT(NDEX) = ZTEMP
++  225     CONTINUE
+ C                              diagonal elements
+         NDEX = NDEX + 1
+         VHMAT(NDEX) = 2.0 * P(I,I)
+@@ -217,10 +220,12 @@
+       NDEX = I*(I-1)/2
+       DO 394 J= 1, I-1
+       NDEX = NDEX + 1
+-  394 VHMAT(NDEX) = 0.0
++      VHMAT(NDEX) = 0.0
++  394 CONTINUE
+       NDEX = NDEX +1
+       G2I = G2(I)
+       IF (G2I .LE. ZERO)  G2I = 1.0
+-  395 VHMAT(NDEX) = 2.0/G2I
++      VHMAT(NDEX) = 2.0/G2I
++  395 CONTINUE
+   900 RETURN
+       END
+diff -x .git -ruN minuit-orig/mnimpr.F minuit/mnimpr.F
+--- minuit-orig/mnimpr.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mnimpr.F	2025-02-07 14:05:50.390511014 +0000
+@@ -39,25 +39,30 @@
+          DO 2 I= 1, NPAR
+          XT(I) = X(I)
+          DSAV(I) = WERR(I)
+-           DO 2 J = 1, I
++           DO 1 J = 1, I
+            NDEX = I*(I-1)/2 + J
+            P(I,J) = VHMAT(NDEX)
+-    2      P(J,I) = P(I,J)
++           P(J,I) = P(I,J)
++    1      CONTINUE
++    2    CONTINUE
+       CALL MNVERT(P,MAXINT,MAXINT,NPAR,IFAIL)
+       IF (IFAIL .GE. 1)  GO TO 280
+ C               Save inverted matrix in VT
+          DO 12 I= 1, NPAR
+          NDEX = I*(I-1)/2
+-           DO 12 J= 1, I
++           DO 11 J= 1, I
+            NDEX = NDEX + 1
+-   12      VTHMAT(NDEX) = P(I,J)
++           VTHMAT(NDEX) = P(I,J)
++   11      CONTINUE
++   12    CONTINUE
+       LOOP = 0
+ C
+    20 CONTINUE
+          DO 25 I= 1, NPAR
+          DIRIN(I) = 2.0*DSAV(I)
+          CALL MNRN15(RNUM,ISEED)
+-   25    X(I) = XT(I) + 2.0*DIRIN(I)*(RNUM-0.5)
++         X(I) = XT(I) + 2.0*DIRIN(I)*(RNUM-0.5)
++   25    CONTINUE
+       LOOP = LOOP + 1
+       REG = 2.0
+       IF (ISW(5) .GE. 0)   WRITE (ISYSWR, 1040) LOOP
+@@ -82,7 +87,8 @@
+             JH = I
+          ENDIF
+             DO 40 J= 1, NPAR
+-   40       P(J,I) = X(J)
++            P(J,I) = X(J)
++   40       CONTINUE
+          P(I,NPARP1) = XI
+          X(I) = XI
+    45    CONTINUE
+@@ -101,15 +107,18 @@
+       DO 60 I= 1, NPAR
+       PB = 0.
+       DO 59 J= 1, NPARP1
+-   59 PB = PB + WG * P(I,J)
++      PB = PB + WG * P(I,J)
++   59 CONTINUE
+       PBAR(I) = PB - WG * P(I,JH)
+-   60 PSTAR(I)=(1.+ALPHA)*PBAR(I)-ALPHA*P(I,JH)
++      PSTAR(I)=(1.+ALPHA)*PBAR(I)-ALPHA*P(I,JH)
++   60 CONTINUE
+       CALL MNCALF(FCN,PSTAR,YCALF,FUTIL)
+       YSTAR = YCALF
+       IF(YSTAR.GE.AMIN) GO TO 70
+ C         point * better than jl, calculate new point **
+       DO 61 I=1,NPAR
+-   61 PSTST(I)=GAMMA*PSTAR(I)+(1.-GAMMA)*PBAR(I)
++      PSTST(I)=GAMMA*PSTAR(I)+(1.-GAMMA)*PBAR(I)
++   61 CONTINUE
+       CALL MNCALF(FCN,PSTST,YCALF,FUTIL)
+       YSTST = YCALF
+    66 IF (YSTST .LT. Y(JL))  GO TO 67
+@@ -124,7 +133,8 @@
+       IF (JHOLD .NE. JH)  GO TO 50
+ C         calculate new point **
+    73 DO 74 I=1,NPAR
+-   74 PSTST(I)=BETA*P(I,JH)+(1.-BETA)*PBAR(I)
++      PSTST(I)=BETA*P(I,JH)+(1.-BETA)*PBAR(I)
++   74 CONTINUE
+       CALL MNCALF(FCN,PSTST,YCALF,FUTIL)
+       YSTST = YCALF
+       IF(YSTST.GT.Y(JH)) GO TO 30
+@@ -173,7 +183,8 @@
+   300 ISW(1) = 1
+   325 DO 330 I= 1, NPAR
+       DIRIN(I) = 0.01*DSAV(I)
+-  330 X(I) = XT(I)
++      X(I) = XT(I)
++  330 CONTINUE
+       AMIN = APSI
+       EDM = SIGSAV
+   350 CALL MNINEX(X)
+diff -x .git -ruN minuit-orig/mninit.F minuit/mninit.F
+--- minuit-orig/mninit.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mninit.F	2025-02-07 14:06:49.797984431 +0000
+@@ -83,7 +83,8 @@
+ #endif
+ C        DEBUG options set to default values
+       DO 10 IDB= 0, MAXDBG
+-   10 IDBG(IDB) = 0
++      IDBG(IDB) = 0
++   10 CONTINUE
+       LREPOR = .FALSE.
+       LWARN  = .TRUE.
+       LIMSET = .FALSE.
+diff -x .git -ruN minuit-orig/mnline.F minuit/mnline.F
+--- minuit-orig/mnline.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mnline.F	2025-02-07 14:08:55.735286626 +0000
+@@ -65,7 +65,8 @@
+       RATIO = ABS(START(I)/STEP(I))
+       IF (SLAMIN .EQ. ZERO)     SLAMIN = RATIO
+       IF (RATIO .LT. SLAMIN)  SLAMIN = RATIO
+-   20 X(I) = START(I) + STEP(I)
++      X(I) = START(I) + STEP(I)
++   20 CONTINUE
+       IF (SLAMIN .EQ. ZERO)  SLAMIN = EPSMAC
+       SLAMIN = SLAMIN*EPSMA2
+       NPARX = NPAR
+@@ -100,7 +101,8 @@
+       IF (ABS(SLAM-1.0).LT.TOLER8) SLAM = 1.0+TOLER8
+       IF (NXYPT .GE. MAXPT) GO TO 65
+       DO 30 I= 1, NPAR
+-   30 X(I) = START(I) + SLAM*STEP(I)
++      X(I) = START(I) + SLAM*STEP(I)
++   30 CONTINUE
+       CALL MNINEX(X)
+       CALL FCN(NPAR,GIN,F2,U,4,FUTIL)
+       NFCN = NFCN + 1
+@@ -156,7 +158,8 @@
+ C                take the step
+       IF (NXYPT .GE. MAXPT) GO TO 65
+       DO 60 I= 1, NPAR
+-   60 X(I) = START(I)+SLAM*STEP(I)
++      X(I) = START(I)+SLAM*STEP(I)
++   60 CONTINUE
+       CALL MNINEX(X)
+       CALL FCN(NPARX,GIN,F3,U,4,FUTIL)
+       NFCN = NFCN + 1
+@@ -212,7 +215,8 @@
+       AMIN = FVMIN
+       DO 120 I= 1, NPAR
+       DIRIN(I) = STEP(I)*XVMIN
+-  120 X(I) = START(I) + DIRIN(I)
++      X(I) = START(I) + DIRIN(I)
++  120 CONTINUE
+       CALL MNINEX(X)
+       IF (XVMIN .LT. 0.)      CALL MNWARN('D','MNLINE',
+      +                   ' LINE MINIMUM IN BACKWARDS DIRECTION')
+diff -x .git -ruN minuit-orig/mnmatu.F minuit/mnmatu.F
+--- minuit-orig/mnmatu.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mnmatu.F	2025-02-07 16:10:46.476911526 +0000
+@@ -53,7 +53,8 @@
+            N = MIN(I,J)
+            NDEX = M*(M-1)/2 + N
+            NDJ = J*(J+1)/2
+-  170      VLINE(J) = VHMAT(NDEX)/SQRT(ABS(VHMAT(NDI)*VHMAT(NDJ)))
++           VLINE(J) = VHMAT(NDEX)/SQRT(ABS(VHMAT(NDI)*VHMAT(NDJ)))
++  170      CONTINUE
+          NPARM = MIN(NPAR,NCOEF)
+          WRITE (ISYSWR,171)   IX, GLOBCC(I), (VLINE(IT),IT=1,NPARM)
+   171    FORMAT (6X,I3,2X,F7.5,1X,20F6.3)
+diff -x .git -ruN minuit-orig/mnmigr.F minuit/mnmigr.F
+--- minuit-orig/mnmigr.F	2025-02-04 18:35:50.016473884 +0000
++++ minuit/mnmigr.F	2025-02-07 16:10:10.088983070 +0000
+@@ -104,7 +104,8 @@
+          NDEX = I*(I-1)/2
+            DO 7 J=1,I-1
+            NDEX = NDEX + 1
+-    7      VHMAT(NDEX) = 0.
++           VHMAT(NDEX) = 0.
++    7      CONTINUE
+          NDEX = NDEX + 1
+          IF (G2(I) .LE. ZERO)  G2(I) = 1.
+          VHMAT(NDEX) = 2./G2(I)
+@@ -128,9 +129,11 @@
+          NDEX = I*(I-1)/2
+            DO 17 J= 1, I-1
+            NDEX = NDEX + 1
+-   17      EDM = EDM + GS(I)*VHMAT(NDEX)*GS(J)
++           EDM = EDM + GS(I)*VHMAT(NDEX)*GS(J)
++   17      CONTINUE
+          NDEX = NDEX + 1
+-   18    EDM = EDM + 0.5 * GS(I)**2 *VHMAT(NDEX)
++         EDM = EDM + 0.5 * GS(I)**2 *VHMAT(NDEX)
++   18    CONTINUE
+       EDM = EDM * 0.5 * (1.0+3.0*DCOVAR)
+         IF (EDM .LT. ZERO)  THEN
+         CALL MNWARN('W','MIGRAD','STARTING MATRIX NOT POS-DEFINITE.')
+@@ -156,9 +159,11 @@
+            M = MAX(I,J)
+            N = MIN(I,J)
+            NDEX = M*(M-1)/2 + N
+-   25      RI = RI + VHMAT(NDEX) *GS(J)
++           RI = RI + VHMAT(NDEX) *GS(J)
++   25      CONTINUE
+          STEP(I) = -0.5*RI
+-   30    GDEL = GDEL + STEP(I)*GS(I)
++         GDEL = GDEL + STEP(I)*GS(I)
++   30    CONTINUE
+       IF (GSSQ .EQ. ZERO)  THEN
+           CALL MNWARN('D','MIGRAD',
+      +             ' FIRST DERIVATIVES OF FCN ARE ALL ZERO')
+@@ -199,13 +204,15 @@
+            N = MIN(I,J)
+            NDEX = M*(M-1)/2 + N
+            VGI = VGI + VHMAT(NDEX)*(GRD(J)-GS(J))
+-   90      RI  =  RI + VHMAT(NDEX)* GRD(J)
++           RI  =  RI + VHMAT(NDEX)* GRD(J)
++   90      CONTINUE
+       VG(I) = VGI*0.5
+       GAMI = GRD(I) - GS(I)
+       GDGSSQ = GDGSSQ + GAMI**2
+       GVG = GVG + GAMI*VG(I)
+       DELGAM = DELGAM + DIRIN(I)*GAMI
+-  100 EDM = EDM + GRD(I)*RI*0.5
++      EDM = EDM + GRD(I)*RI*0.5
++  100 CONTINUE
+       EDM = EDM * 0.5 * (1.0 + 3.0*DCOVAR)
+ C                          . if EDM negative,  not positive-definite
+       IF (EDM .LT. ZERO .OR. GVG .LE. ZERO)  THEN
+@@ -233,13 +240,14 @@
+       DSUM = 0.
+       VSUM = 0.
+          DO  120  I=1, NPAR
+-           DO  120  J=1, I
++           DO 119  J=1, I
+            D = DIRIN(I)*DIRIN(J)/DELGAM - VG(I)*VG(J)/GVG
+            DSUM = DSUM + ABS(D)
+            NDEX = I*(I-1)/2 + J
+            VHMAT(NDEX) = VHMAT(NDEX) + 2.0*D
+            VSUM = VSUM + ABS(VHMAT(NDEX))
+-  120      CONTINUE
++  119 CONTINUE
++  120 CONTINUE
+ C                smooth local fluctuations by averaging DCOVAR
+       DCOVAR = 0.5*(DCOVAR + DSUM/VSUM)
+       IF (ISWTR.GE.3 .OR. LDEBUG) WRITE (ISYSWR,'(A,F5.1,A)')
+@@ -248,11 +256,14 @@
+      +             (VHMAT(KK),KK=1,10)
+       IF (DELGAM .LE. GVG)  GO TO 135
+       DO 125 I= 1, NPAR
+-  125 FLNU(I) = DIRIN(I)/DELGAM - VG(I)/GVG
++      FLNU(I) = DIRIN(I)/DELGAM - VG(I)/GVG
++  125 CONTINUE
+       DO 130 I= 1, NPAR
+-      DO 130 J= 1, I
++      DO 129 J= 1, I
+       NDEX = I*(I-1)/2 + J
+-  130 VHMAT(NDEX) = VHMAT(NDEX) + 2.0*GVG*FLNU(I)*FLNU(J)
++      VHMAT(NDEX) = VHMAT(NDEX) + 2.0*GVG*FLNU(I)*FLNU(J)
++  129 CONTINUE
++  130 CONTINUE
+   135 CONTINUE
+ C                                              and see if converged
+       IF (EDM .LT. 0.1*RHOTOL)  GO TO 300
+@@ -277,7 +288,8 @@
+   200 IF (ISWTR .GE. 1)  WRITE (ISYSWR,'(A)')
+      +           ' MIGRAD FAILS TO FIND IMPROVEMENT'
+       DO 210 I= 1, NPAR
+-  210 X(I) = XXS(I)
++      X(I) = XXS(I)
++  210 CONTINUE
+       IF (EDM .LT. RHOTOL)  GO TO 300
+       IF (EDM .LT. ABS(EPSMA2*AMIN))  THEN
+          IF (ISWTR .GE. 0)  WRITE (ISYSWR, '(A)')
+diff -x .git -ruN minuit-orig/mnmnot.F minuit/mnmnot.F
+--- minuit-orig/mnmnot.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnmnot.F	2025-02-07 15:43:04.257898502 +0000
+@@ -34,12 +34,15 @@
+       MPAR=NPAR
+       NFMXIN = NFCNMX
+       DO 125 I= 1, MPAR
+-  125 XT(I) = X(I)
++      XT(I) = X(I)
++  125 CONTINUE
+       DO 130 J= 1, MPAR*(MPAR+1)/2
+-  130 VTHMAT(J) = VHMAT(J)
++      VTHMAT(J) = VHMAT(J)
++  130 CONTINUE
+       DO 135 I= 1, MPAR
+       GCC(I) = GLOBCC(I)
+-  135 W(I) = WERR(I)
++         W(I) = WERR(I)
++  135 CONTINUE
+       IT = NIOFEX(ILAX)
+       ERP(IT) = 0.
+       ERN(IT) = 0.
+@@ -93,7 +96,8 @@
+       IF (ABS(DELU)/(ABS(UT)+ABS(U(ILAX))) .LT. EPSMAC)  GO TO 440
+       FAC = DELU/W(IT)
+          DO 185 I= 1, NPAR
+-  185    X(I) = XT(I) + FAC*XDEV(I)
++         X(I) = XT(I) + FAC*XDEV(I)
++  185    CONTINUE
+       IF (ISW(5) .GT. 1) WRITE (ISYSWR,801)  ILAX,UT,DELU,U(ILAX)
+   801 FORMAT (/' PARAMETER',I4,' SET TO',E11.3,' + ',E10.3,' = ',E12.3)
+ C                                        loop to hit AMIN+UP
+@@ -144,11 +148,13 @@
+       ITAUR = 1
+       CALL MNFREE(1)
+       DO 550 J= 1, MPAR*(MPAR+1)/2
+-  550 VHMAT(J) = VTHMAT(J)
++      VHMAT(J) = VTHMAT(J)
++  550 CONTINUE
+       DO 595 I= 1, MPAR
+       WERR(I) = W(I)
+       GLOBCC(I) = GCC(I)
+-  595 X(I) = XT(I)
++      X(I) = XT(I)
++  595 CONTINUE
+       CALL MNINEX (X)
+       EDM = SIGSAV
+       AMIN = ABEST
+diff -x .git -ruN minuit-orig/mnpfit.F minuit/mnpfit.F
+--- minuit-orig/mnpfit.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnpfit.F	2025-02-07 14:10:14.004812771 +0000
+@@ -27,14 +27,16 @@
+       DIMENSION CZ(3)
+ C
+       DO 3  I=1,3
+-    3 CZ(I)=0.
++      CZ(I)=0.
++    3 CONTINUE
+       SDEV2P=0.
+       IF(NPAR2P.LT.3) GO TO 10
+       F=NPAR2P
+ C--- center x values for reasons of machine precision
+       XM=0.
+       DO 2  I=1,NPAR2P
+-    2 XM=XM+PARX2P(I)
++      XM=XM+PARX2P(I)
++    2 CONTINUE
+       XM=XM/F
+       X2=0.
+       X3=0.
+@@ -68,6 +70,7 @@
+       CZ(2)=CZ(2)-2.*XM*CZ(3)
+    10 CONTINUE
+       DO 11  I=1,3
+-   11 COEF2P(I)=CZ(I)
++      COEF2P(I)=CZ(I)
++   11 CONTINUE
+       RETURN
+       END
+diff -x .git -ruN minuit-orig/mnplot.F minuit/mnplot.F
+--- minuit-orig/mnplot.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnplot.F	2025-02-07 14:11:28.958858107 +0000
+@@ -87,7 +87,8 @@
+ C         convert points to grid positions
+       DO 300 I= 1, NXYPT
+       XPT(I) = AX*XPT(I) + BX
+-  300 YPT(I) = ANY-AY*YPT(I) - BY
++      YPT(I) = ANY-AY*YPT(I) - BY
++  300 CONTINUE
+       NXBEST = AX*XBEST + BX
+       NYBEST = ANY  - AY*YBEST - BY
+ C         print the points
+@@ -98,13 +99,15 @@
+       OVERPR=.FALSE.
+       DO 400 I= 1, NY
+       DO 310 IBK= 1, NX
+-  310 CLINE (IBK:IBK) = CBLANK
++      CLINE (IBK:IBK) = CBLANK
++  310 CONTINUE
+       CLINE(1:1) = CDOT
+       CLINE(NX:NX) = CDOT
+       CLINE(NXBEST:NXBEST) = CDOT
+       IF (I.NE.1 .AND. I.NE.NYBEST .AND. I.NE.NY)  GO TO 320
+       DO 315 J= 1, NX
+-  315 CLINE(J:J) = CDOT
++      CLINE(J:J) = CDOT
++  315 CONTINUE
+   320 CONTINUE
+       YPRT = YMAX - FLOAT(I-1)*BWIDY
+       IF (ISP1 .GT. NXYPT)  GO TO 350
+@@ -142,7 +145,8 @@
+       WRITE (NUNIT, '(18X,A)')       CLINE(:NX)
+ C
+       DO 430 IBK= 1, 12
+-  430 XVALUS(IBK) = XMIN + FLOAT(IBK-1)*10.*BWIDX
++      XVALUS(IBK) = XMIN + FLOAT(IBK-1)*10.*BWIDX
++  430 CONTINUE
+       ITEN = (NX+9) / 10
+       WRITE (NUNIT,'(12X,12G10.4)')  (XVALUS(IBK), IBK=1,ITEN)
+       CHMESS = ' '
+diff -x .git -ruN minuit-orig/mnprin.F minuit/mnprin.F
+--- minuit-orig/mnprin.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnprin.F	2025-02-07 14:12:09.270290882 +0000
+@@ -45,7 +45,8 @@
+ C                  set 'default' column headings
+       DO 5 K= 1, 6
+       COLHDU(K) = 'UNDEFINED'
+-    5 COLHDL(K) = 'COLUMN HEAD'
++      COLHDL(K) = 'COLUMN HEAD'
++    5 CONTINUE
+ C              print title if Minos errors, and title exists.
+       IF (IKODE.EQ.4 .AND. CTITL.NE.CUNDEF)
+      +            WRITE (ISYSWR,'(/A,A)')  ' MINUIT TASK: ',CTITL
+diff -x .git -ruN minuit-orig/mnpsdf.F minuit/mnpsdf.F
+--- minuit-orig/mnpsdf.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnpsdf.F	2025-02-07 14:13:55.256541507 +0000
+@@ -60,9 +60,11 @@
+       VHMAT(NDEXD) = VHMAT(NDEXD) + DG
+       IF (VHMAT(NDEXD) .LE. ZERO)   VHMAT(NDEXD) = 1.0
+       S(I) = 1.0/SQRT(VHMAT(NDEXD))
+-      DO 213 J= 1, I
++      DO 212 J= 1, I
+       NDEX =  NDEX + 1
+-  213 P(I,J) = VHMAT(NDEX) * S(I)*S(J)
++      P(I,J) = VHMAT(NDEX) * S(I)*S(J)
++  212 CONTINUE
++  213 CONTINUE
+ C      call eigen (p,p,maxint,npar,pstar,-npar)
+       CALL MNEIG(P,MAXINT,NPAR,MAXINT,PSTAR,EPSPDF,IFAULT)
+       PMIN = PSTAR(1)
+@@ -81,7 +83,8 @@
+       PADD = 1.0E-3*PMAX - PMIN
+       DO 216 IP= 1, NPAR
+       NDEX = IP*(IP+1)/2
+-  216 VHMAT(NDEX) = VHMAT(NDEX) *(1.0 + PADD)
++      VHMAT(NDEX) = VHMAT(NDEX) *(1.0 + PADD)
++  216 CONTINUE
+       CSTATU= 'NOT POSDEF'
+       WRITE (CHBUFF,'(G12.5)') PADD
+       CALL MNWARN('W',CFROM,
+diff -x .git -ruN minuit-orig/mnrazz.F minuit/mnrazz.F
+--- minuit-orig/mnrazz.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnrazz.F	2025-02-07 14:14:31.990834261 +0000
+@@ -19,11 +19,13 @@
+ #include "minuit/d506cm.inc"
+       DIMENSION PNEW(*), Y(*)
+       DO 10 I=1,NPAR
+-   10 P(I,JH) = PNEW(I)
++      P(I,JH) = PNEW(I)
++   10 CONTINUE
+       Y(JH)=YNEW
+       IF(YNEW .LT. AMIN) THEN
+         DO 15 I=1,NPAR
+-   15   X(I) = PNEW(I)
++        X(I) = PNEW(I)
++   15   CONTINUE
+         CALL MNINEX(X)
+         AMIN = YNEW
+         CSTATU = 'PROGRESS  '
+diff -x .git -ruN minuit-orig/mnseek.F minuit/mnseek.F
+--- minuit-orig/mnseek.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnseek.F	2025-02-07 14:16:57.341092226 +0000
+@@ -56,14 +56,16 @@
+          IF (ABS(DIRIN(IPAR)).GT.TWOPI)  DIRIN(IPAR)=TWOPI
+          ENDIF
+       XMID(IPAR) = X(IPAR)
+-   10 XBEST(IPAR) = X(IPAR)
++      XBEST(IPAR) = X(IPAR)
++   10 CONTINUE
+ C                              search loop
+       DO 500 ISTEP= 1, MXSTEP
+       IF (IFAIL .GE. MXFAIL)  GO TO 600
+         DO 100 IPAR= 1, NPAR
+         CALL MNRN15(RNUM1,ISEED)
+         CALL MNRN15(RNUM2,ISEED)
+-  100   X(IPAR) = XMID(IPAR) + 0.5*(RNUM1+RNUM2-1.)*DIRIN(IPAR)
++        X(IPAR) = XMID(IPAR) + 0.5*(RNUM1+RNUM2-1.)*DIRIN(IPAR)
++  100   CONTINUE
+       CALL MNINEX(X)
+       CALL FCN(NPARX,GIN,FTRY,U,4,FUTIL)
+       NFCN = NFCN + 1
+@@ -72,7 +74,8 @@
+             CSTATU = 'IMPROVEMNT'
+             AMIN = FTRY
+             DO 200 IB= 1, NPAR
+-  200       XBEST(IB) = X(IB)
++            XBEST(IB) = X(IB)
++  200       CONTINUE
+             IFAIL = 0
+             IF (ISW(5) .GE. 2) CALL MNPRIN(2,AMIN)
+             ENDIF
+@@ -96,7 +99,8 @@
+       IF (ISW(5) .GT. 1) WRITE (ISYSWR,601) IFAIL
+   601 FORMAT(' MNSEEK:',I5,' SUCCESSIVE UNSUCCESSFUL TRIALS.')
+       DO 700 IB= 1, NPAR
+-  700 X(IB) = XBEST(IB)
++      X(IB) = XBEST(IB)
++  700 CONTINUE
+       CALL MNINEX(X)
+       IF (ISW(5) .GE. 1)  CALL MNPRIN(2,AMIN)
+       IF (ISW(5) .EQ. 0)  CALL MNPRIN(0,AMIN)
+diff -x .git -ruN minuit-orig/mnset.F minuit/mnset.F
+--- minuit-orig/mnset.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnset.F	2025-02-07 14:18:36.363106813 +0000
+@@ -161,7 +161,8 @@
+       ENDIF
+       DO 95 I= 1, NPAR
+       ERN(I) = 0.
+-   95 ERP(I) = 0.
++      ERP(I) = 0.
++   95 CONTINUE
+       CALL MNWERR
+       GO TO 4000
+ C                                        . . . . . . . . . . set input
+@@ -236,7 +237,8 @@
+       ELSE
+ C             SET DEBUG -1  sets all debug options
+           DO 285 ID= 0, NUMDBG
+-  285     IDBG(ID) = ISET
++          IDBG(ID) = ISET
++  285     CONTINUE
+       ENDIF
+       LREPOR = (IDBG(0) .GE. 1)
+       CALL MNWARN('D','SHO','SHO')
+@@ -392,7 +394,8 @@
+       DO 1285 ID= 0, NUMDBG
+       COPT = 'OFF'
+       IF (IDBG(ID) .GE. 1)  COPT = 'ON '
+- 1285 WRITE (ISYSWR,1286) ID, COPT, CDBOPT(ID)
++      WRITE (ISYSWR,1286) ID, COPT, CDBOPT(ID)
++ 1285 CONTINUE
+  1286 FORMAT (10X,'DEBUG OPTION',I3,' IS ',A3,' :',A)
+       IF (.NOT. LREPOR) CALL MNWARN('D','SHO','SHO')
+       GO TO 4000
+diff -x .git -ruN minuit-orig/mnsimp.F minuit/mnsimp.F
+--- minuit-orig/mnsimp.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnsimp.F	2025-02-07 14:20:43.604033424 +0000
+@@ -101,13 +101,15 @@
+       IF (AMING .LT. ABSMIN)  ABSMIN = AMING
+       X(I) = BESTX
+       DO 9 K= 1, NPAR
+-    9 P(K,I) = X(K)
++      P(K,I) = X(K)
++    9 CONTINUE
+    10 CONTINUE
+       JH = NPARP1
+       AMIN=Y(JL)
+       CALL MNRAZZ(YNPP1,PBAR,Y,JH,JL)
+       DO 20 I= 1, NPAR
+-   20 X(I) = P(I,JL)
++      X(I) = P(I,JL)
++   20 CONTINUE
+       CALL MNINEX(X)
+       IF (ISW(5) .GE. 1)  CALL MNPRIN(5,AMIN)
+       EDM = BIGEDM
+@@ -122,9 +124,11 @@
+       DO 60 I= 1, NPAR
+       PB = 0.
+       DO 59 J= 1, NPARP1
+-   59 PB = PB + WG * P(I,J)
++      PB = PB + WG * P(I,J)
++   59 CONTINUE
+       PBAR(I) = PB - WG * P(I,JH)
+-   60 PSTAR(I)=(1.+ALPHA)*PBAR(I)-ALPHA*P(I,JH)
++      PSTAR(I)=(1.+ALPHA)*PBAR(I)-ALPHA*P(I,JH)
++   60 CONTINUE
+       CALL MNINEX(PSTAR)
+       CALL FCN(NPARX,GIN,YSTAR,U,4,FUTIL)
+       NFCN=NFCN+1
+@@ -132,7 +136,8 @@
+ C         point * better than jl, calculate new point **
+       CSTATU = 'PROGRESS  '
+       DO 61 I=1,NPAR
+-   61 PSTST(I)=GAMMA*PSTAR(I)+(1.-GAMMA)*PBAR(I)
++      PSTST(I)=GAMMA*PSTAR(I)+(1.-GAMMA)*PBAR(I)
++   61 CONTINUE
+       CALL MNINEX(PSTST)
+       CALL FCN(NPARX,GIN,YSTST,U,4,FUTIL)
+       NFCN=NFCN+1
+@@ -143,7 +148,8 @@
+       IF (RHO .LT. RHOMIN)  GO TO 66
+       IF (RHO .GT. RHOMAX)  RHO = RHOMAX
+       DO 64 I= 1, NPAR
+-   64 PRHO(I) = RHO*PBAR(I) + (1.0-RHO)*P(I,JH)
++      PRHO(I) = RHO*PBAR(I) + (1.0-RHO)*P(I,JH)
++   64 CONTINUE
+       CALL MNINEX(PRHO)
+       CALL FCN(NPARX,GIN,YRHO, U,4,FUTIL)
+       NFCN = NFCN + 1
+@@ -169,7 +175,8 @@
+       IF (JHOLD .NE. JH)  GO TO 50
+ C         calculate new point **
+    73 DO 74 I=1,NPAR
+-   74 PSTST(I)=BETA*P(I,JH)+(1.-BETA)*PBAR(I)
++      PSTST(I)=BETA*P(I,JH)+(1.-BETA)*PBAR(I)
++   74 CONTINUE
+       CALL MNINEX (PSTST)
+       CALL FCN(NPARX,GIN,YSTST,U,4,FUTIL)
+       NFCN=NFCN+1
+@@ -192,8 +199,10 @@
+    80 DO 82 I=1,NPAR
+       PB = 0.
+       DO 81 J=1,NPARP1
+-   81 PB = PB + WG * P(I,J)
+-   82 PBAR(I) = PB - WG * P(I,JH)
++      PB = PB + WG * P(I,J)
++   81 CONTINUE
++      PBAR(I) = PB - WG * P(I,JH)
++   82 CONTINUE
+       CALL MNINEX(PBAR)
+       CALL FCN(NPARX,GIN,YPBAR,U,4,FUTIL)
+       NFCN=NFCN+1
+diff -x .git -ruN minuit-orig/mnvert.F minuit/mnvert.F
+--- minuit-orig/mnvert.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnvert.F	2025-02-07 15:38:41.257685714 +0000
+@@ -39,11 +39,14 @@
+ C                   scale matrix by sqrt of diag elements
+       DO 8  I=1,N
+       SI = A(I,I)
+-      IF (SI) 100,100,8
+-    8 S(I) = 1.0/SQRT(SI)
++      IF (SI <= ZERO) GO TO 100 
++      S(I) = 1.0/SQRT(SI)
++    8 CONTINUE
+       DO 20 I= 1, N
+-      DO 20 J= 1, N
+-   20 A(I,J) = A(I,J) *S(I)*S(J)
++      DO 19 J= 1, N
++      A(I,J) = A(I,J) *S(I)*S(J)
++   19 CONTINUE
++   20 CONTINUE
+ C                                        . . . start main loop . . . .
+       DO 65 I=1,N
+       K = I
+@@ -54,25 +57,38 @@
+       A(K,K)=0.0
+       KP1=K+1
+       KM1=K-1
+-      IF(KM1)100,50,40
+-   40 DO 49 J=1,KM1
++      IF(KM1 < ZERO) GO TO 100
++      IF(KM1 > ZERO) THEN
++      DO 49 J=1,KM1
+       PP(J)=A(J,K)
+       Q(J)=A(J,K)*Q(K)
+-   49 A(J,K)=0.
+-   50 IF(K-N)51,60,100
+-   51 DO 59 J=KP1,N
++      A(J,K)=0.
++   49 CONTINUE
++      END IF
++   50 IF(K-N > ZERO) THEN
++         GO TO 100
++      END IF
++      IF (K-N < ZERO) THEN 
++      DO 59 J=KP1,N
+       PP(J)=A(K,J)
+       Q(J)=-A(K,J)*Q(K)
+-   59 A(K,J)=0.0
++      A(K,J)=0.0
++   59 CONTINUE
++      END IF
+ C                   elimination proper
+-   60 DO 65 J=1,N
+-      DO 65 K=J,N
+-   65 A(J,K)=A(J,K)+PP(J)*Q(K)
++   60 DO 64 J=1,N
++      DO 63 K=J,N
++      A(J,K)=A(J,K)+PP(J)*Q(K)
++   63 CONTINUE
++   64 CONTINUE
++   65 CONTINUE
+ C                   elements of left diagonal and unscaling
+       DO 70 J= 1, N
+-      DO 70 K= 1, J
++      DO 69 K= 1, J
+       A(K,J) = A(K,J) *S(K)*S(J)
+-   70 A(J,K) = A(K,J)
++      A(J,K) = A(K,J)
++   69 CONTINUE
++   70 CONTINUE
+       RETURN
+ C                   failure return
+   100 IFAIL=1
+diff -x .git -ruN minuit-orig/mnwerr.F minuit/mnwerr.F
+--- minuit-orig/mnwerr.F	2025-02-04 18:35:50.020473596 +0000
++++ minuit/mnwerr.F	2025-02-07 15:41:44.469702380 +0000
+@@ -39,10 +39,12 @@
+          DO 130 I= 1, NPAR
+             GLOBCC(I) = 0.
+             K1 = I*(I-1)/2
+-            DO 130 J= 1, I
++            DO 129 J= 1, I
+                K = K1 + J
+                P(I,J) = VHMAT(K)
+-  130          P(J,I) = P(I,J)
++               P(J,I) = P(I,J)
++  129       CONTINUE
++  130    CONTINUE
+          CALL MNVERT(P,MAXINT,MAXINT,NPAR,IERR)
+          IF (IERR .EQ. 0)   THEN
+             DO 150 IIN= 1, NPAR

@@ -25,14 +25,17 @@ CC
       NFCN = NFCN + 1
       DO 200 I= 1, NPAR
       GRD(I) = 0.
-         DO 200 J= 1, NPAR
+         DO 199 J= 1, NPAR
          M = MAX(I,J)
          N = MIN(I,J)
          NDEX = M*(M-1)/2 + N
-  200    GRD(I) = GRD(I) + VTHMAT(NDEX) * (XT(J)-PVEC(J))
+         GRD(I) = GRD(I) + VTHMAT(NDEX) * (XT(J)-PVEC(J))
+  199 CONTINUE
+  200 CONTINUE
       DENOM = 0.
       DO 210 I= 1, NPAR
-  210 DENOM = DENOM + GRD(I) * (XT(I)-PVEC(I))
+      DENOM = DENOM + GRD(I) * (XT(I)-PVEC(I))
+  210 CONTINUE
       IF (DENOM .LE. ZERO)  THEN
          DCOVAR = 1.
          ISW(2) = 0

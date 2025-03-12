@@ -27,14 +27,16 @@ C   method : chi**2 = min equation solved explicitly
       DIMENSION CZ(3)
 C
       DO 3  I=1,3
-    3 CZ(I)=0.
+      CZ(I)=0.
+    3 CONTINUE
       SDEV2P=0.
       IF(NPAR2P.LT.3) GO TO 10
       F=NPAR2P
 C--- center x values for reasons of machine precision
       XM=0.
       DO 2  I=1,NPAR2P
-    2 XM=XM+PARX2P(I)
+      XM=XM+PARX2P(I)
+    2 CONTINUE
       XM=XM/F
       X2=0.
       X3=0.
@@ -68,6 +70,7 @@ C--- center x values for reasons of machine precision
       CZ(2)=CZ(2)-2.*XM*CZ(3)
    10 CONTINUE
       DO 11  I=1,3
-   11 COEF2P(I)=CZ(I)
+      COEF2P(I)=CZ(I)
+   11 CONTINUE
       RETURN
       END

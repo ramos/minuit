@@ -45,7 +45,8 @@ C                  get value of IKODE based in INKODE, ISW(2)
 C                  set 'default' column headings
       DO 5 K= 1, 6
       COLHDU(K) = 'UNDEFINED'
-    5 COLHDL(K) = 'COLUMN HEAD'
+      COLHDL(K) = 'COLUMN HEAD'
+    5 CONTINUE
 C              print title if Minos errors, and title exists.
       IF (IKODE.EQ.4 .AND. CTITL.NE.CUNDEF)
      +            WRITE (ISYSWR,'(/A,A)')  ' MINUIT TASK: ',CTITL
